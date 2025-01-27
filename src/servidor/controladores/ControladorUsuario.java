@@ -16,8 +16,8 @@ public class ControladorUsuario {
     public synchronized Usuario logearUsuario(String nombre, Socket socket){
         Usuario resultadoBusqueda = buscarPorNombre(nombre);
         Usuario usuarioLogeado;
-        System.out.println(nombre + " buscado");
-        if(resultadoBusqueda == null){
+
+        if(resultadoBusqueda == null && nombreValido(nombre)){
             usuarioLogeado = new Usuario(nombre);
             listaUsuarios.add(usuarioLogeado);
             usuarioLogeado.iniciarSesion(socket);
@@ -32,6 +32,12 @@ public class ControladorUsuario {
         return usuarioLogeado;
     }
 
+    private boolean nombreValido(String nombre){
+        return nombre != ""
+                && nombre != null
+                && nombre != "exit";
+    }
+
     private Usuario buscarPorNombre(String nombre){
         Usuario encontrado = null;
         int i = 0;
@@ -41,6 +47,14 @@ public class ControladorUsuario {
             i++;
         }
         return encontrado;
+    }
+
+    public Usuario getUsuarioEnLinea(String nombre){
+        Usuario user = buscarPorNombre(nombre);
+        if(user.isOnline())
+            return user;
+        else
+            return null;
     }
 
     public List<Usuario> getUsuariosEnLinea(){

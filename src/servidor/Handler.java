@@ -35,8 +35,7 @@ class Handler implements Runnable {
             in.close();
             out.close();
             socket.close();
-            if(usuario != null)
-                System.out.println("Cliente: '" +usuario.getNickName()+ "' desconectado");
+            System.out.println("Cliente: '" +getAutor()+ "' desconectado");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }finally {
@@ -71,6 +70,19 @@ class Handler implements Runnable {
             argumentos = inputCrudo.split(" ");
 
             switch ( argumentos[0] ){
+                case "help":
+                    System.out.println();
+                    break;
+                case "msj":
+                    if(argumentos.length >= 2){
+                        Usuario user = controladorUsuario.getUsuarioEnLinea(argumentos[1]);
+                        String mensaje = quitarArgumetos(argumentos,2);
+                        user.mandarMensaje( getAutor(), mensaje );
+                        out.writeUTF("Mensaje: "+mensaje+" Enviado a: "+user.getNickName());
+                    }else
+                        out.writeUTF("ERROR: Faltan argumentos" +
+                                "\n sintaxis: msj [usuario_destino] [mensaje]");
+                    break;
                 case "msjbroadcast":
                     String mensaje = quitarArgumetos(argumentos,1);
                     List<Usuario> lista = controladorUsuario.getUsuariosEnLinea();
@@ -80,6 +92,8 @@ class Handler implements Runnable {
                 case "exit":
                     usuario.cerrarSesion();
                     salir = true;
+                    break;
+                case "":
                     break;
                 default:
                     out.writeUTF("ERROR: '" + argumentos[0] + "' no se reconoce como un comando");
@@ -95,5 +109,12 @@ class Handler implements Runnable {
             }
         else resultado = null;
         return resultado;
+    }
+
+    private String getAutor(){
+        if(usuario != null)
+            return usuario.getNickName();
+        else
+            return "anonimo";
     }
 }

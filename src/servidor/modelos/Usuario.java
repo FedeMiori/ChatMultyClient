@@ -20,7 +20,7 @@ public class Usuario {
 
     public void setSocket(Socket socket) {this.socket = socket;}
 
-    public String getNickName() {return nickName;}
+    public synchronized String getNickName() {return nickName;}
 
     public boolean mismoNombre(String nombre){
         return this.nickName.equalsIgnoreCase(nombre);
