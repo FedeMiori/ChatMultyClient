@@ -43,4 +43,12 @@ public class Usuario {
         socket = null;
         online = false;
     }
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj instanceof Usuario)
+            return this.nickName.equalsIgnoreCase( ((Usuario) obj).getNickName() );
+        else
+            return false;
+    }
 }

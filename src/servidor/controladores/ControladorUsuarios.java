@@ -6,10 +6,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ControladorUsuario {
+public class ControladorUsuarios {
     ArrayList<Usuario> listaUsuarios;
 
-    public ControladorUsuario(){
+    public ControladorUsuarios(){
         listaUsuarios = new ArrayList<>();
     }
 

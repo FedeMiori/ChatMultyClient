@@ -1,26 +1,28 @@
 package servidor;
 
-import servidor.controladores.ControladorUsuario;
+import servidor.controladores.ControladorGrupos;
+import servidor.controladores.ControladorUsuarios;
+import servidor.modelos.Grupo;
 import servidor.modelos.Usuario;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 class Handler implements Runnable {
     private final Socket socket;
     DataInputStream in;
     DataOutputStream out;
-    ControladorUsuario controladorUsuario;
+    ControladorGrupos controladorGrupos;
+    ControladorUsuarios controladorUsuarios;
     Usuario usuario;
 
-    Handler(Socket socket, ControladorUsuario controladorUsuario) {
+    Handler(Socket socket, ControladorUsuarios controladorUsuarios, ControladorGrupos controladorGrupos) {
         this.socket = socket;
-        this.controladorUsuario = controladorUsuario;
+        this.controladorUsuarios = controladorUsuarios;
+        this.controladorGrupos = controladorGrupos;
     }
 
     public void run() {
@@ -47,7 +49,7 @@ class Handler implements Runnable {
     private boolean login() throws IOException {
         out.writeUTF("Inserte su nombre de usuario para iniciar sesion");
         String nombreusuario = in.readUTF();
-        this.usuario = controladorUsuario.logearUsuario(nombreusuario,socket);
+        this.usuario = controladorUsuarios.logearUsuario(nombreusuario,socket);
         System.out.println("test "+nombreusuario);
         if(usuario != null){
             out.writeUTF("Usuario: '"+usuario.getNickName()+"' registrado con exito");
@@ -62,7 +64,7 @@ class Handler implements Runnable {
 
     private void interfazlogeada() throws IOException {
         boolean salir = false;
-        String inputCrudo;
+        String inputCrudo, mensaje;
         String[] argumentos;
 
         while (!salir){
@@ -70,31 +72,102 @@ class Handler implements Runnable {
             argumentos = inputCrudo.split(" ");
 
             switch ( argumentos[0] ){
-                case "help":
-                    System.out.println();
+                case "msjbroadcast":
+                    mensaje = quitarArgumetos(argumentos,1);
+                    List<Usuario> lista = controladorUsuarios.getUsuariosEnLinea();
+                    for(Usuario usuarioDestino : lista)
+                        usuarioDestino.mandarMensaje(getAutor(),mensaje);
                     break;
+
                 case "msj":
                     if(argumentos.length >= 2){
-                        Usuario user = controladorUsuario.getUsuarioEnLinea(argumentos[1]);
-                        String mensaje = quitarArgumetos(argumentos,2);
+                        Usuario user = controladorUsuarios.getUsuarioEnLinea(argumentos[1]);
+                        mensaje = quitarArgumetos(argumentos,2);
                         user.mandarMensaje( getAutor(), mensaje );
                         out.writeUTF("Mensaje: "+mensaje+" Enviado a: "+user.getNickName());
-                    }else
+                    }
+                    else
                         out.writeUTF("ERROR: Faltan argumentos" +
                                 "\n sintaxis: msj [usuario_destino] [mensaje]");
                     break;
-                case "msjbroadcast":
-                    String mensaje = quitarArgumetos(argumentos,1);
-                    List<Usuario> lista = controladorUsuario.getUsuariosEnLinea();
-                    for(Usuario usuarioDestino : lista)
-                        usuarioDestino.mandarMensaje(this.usuario.getNickName(),mensaje);
+
+                case "msjcanal":
+                    if(argumentos.length >= 2){
+                        Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[2] );
+                        grupo.mandarMensajeAlGrupo(getAutor(), quitarArgumetos(argumentos,2));
+                    }
+                    else
+                        out.writeUTF("ERROR: Faltan argumentos" +
+                                "\n sintaxis: msjcanal [nombre_canal] [mensaje]");
                     break;
+
+                case "crearcanal":
+                    if(argumentos.length >= 2){
+                        String posibleNombre = argumentos[2];
+                        if(controladorGrupos.existeGrupo(posibleNombre))
+                            out.writeUTF("El grupo '"+posibleNombre+"' ya existe");
+                        else
+                            controladorGrupos.crearGrupo(posibleNombre);
+                    }
+                    out.writeUTF("ERROR: Faltan argumentos" +
+                            "\n sintaxis: crearcanal [nombre_canal]");
+                    break;
+
+                case "unir":
+                    if(argumentos.length >= 2){
+                        Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[2] );
+                        if(grupo != null){
+                            if(!grupo.estaEnElGrupo(usuario))
+                                grupo.aniadirUsuarioAlGrupo(usuario);
+                            else
+                                out.writeUTF("ERROR: El usuario ya estaba en ese grupo");
+                        }
+                        else
+                            out.writeUTF("ERROR: El grupo '"+argumentos[2]+"' no existe");
+
+                    }
+                    else
+                        out.writeUTF("ERROR: Faltan argumentos" +
+                                "\n sintaxis: unir [canal]");
+                    break;
+
+                case "salir":
+                    if(argumentos.length >= 2){
+                        Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[2] );
+                        if(grupo.eliminarUsuario(usuario))
+                            out.writeUTF("Te has salido del grupo");
+                        else
+                            out.writeUTF("ERROR: ya estabas fuera de ese grupo");
+                    }
+                    break;
+
+                case "help":
+                    out.writeUTF("Ayuda Comandos:\n" +
+                            "\nmsjbroadcast [mensaje]\n" +
+                            "   El mensaje será recibido por todos los clientes conectados al\n" +
+                            "   servidor\n" +
+                            "\nmsj [usuario_destino] [mensaje]\n" +
+                            "   El mensaje es privado y sólo lo recibirá el usuario destino\n" +
+                            "\nmsjcanal [nombre_canal] [mensaje]\n" +
+                            "   El mensaje llegará a todos los miembros de un un canal\n" +
+                            "\ncrearcanal [nombre_canal]\n" +
+                            "   Crea un nuevo grupo con el nombre indicado\n" +
+                            "\nunir [canal]\n" +
+                            "   Une el cliente al canal indicado\n" +
+                            "\nsalir [canal]\n" +
+                            "   Elimina al cliente del canal indicado\n" +
+                            "\nexit\n" +
+                            "   El cliente se desconecta del servidor");
+                    break;
+
+                case "":
+                    break;
+
                 case "exit":
                     usuario.cerrarSesion();
                     salir = true;
                     break;
-                case "":
-                    break;
+
                 default:
                     out.writeUTF("ERROR: '" + argumentos[0] + "' no se reconoce como un comando");
             }

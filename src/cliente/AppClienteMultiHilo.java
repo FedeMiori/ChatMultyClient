@@ -47,11 +47,9 @@ public class AppClienteMultiHilo {
                 }
             });
 
-            // Iniciar los hilos
             recibirHilo.start();
             enviarHilo.start();
 
-            // Esperar a que el hilo de enviar termine
             enviarHilo.join();
 
         } catch (IOException | InterruptedException e) {
