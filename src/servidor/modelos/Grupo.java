@@ -14,6 +14,8 @@ public class Grupo {
         this.listaUsuarios = new LinkedList<>();
     }
 
+    public synchronized String getNombre() {return nombre;}
+
     public synchronized boolean mandarMensajeAlGrupo(String autor, String mensaje) throws IOException {
         if(estaEnElGrupo(autor)){
             for (Usuario usuario : listaUsuarios)
@@ -47,7 +49,7 @@ public class Grupo {
         boolean eliminado = false;
         Iterator<Usuario> it = listaUsuarios.iterator();
         while(!eliminado && it.hasNext())
-            if(user.equals(it.hasNext())) {
+            if(user.equals(it.next())) {
                 it.remove();
                 mandarMensajeAlGrupo("'"+user.getNickName()+"' se salido del grupo");
                 eliminado = true;

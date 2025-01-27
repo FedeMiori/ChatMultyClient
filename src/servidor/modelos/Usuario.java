@@ -31,7 +31,7 @@ public class Usuario {
         if(autor == null)
             out.writeUTF(mensaje);
         else
-            out.writeUTF(autor + ":" +mensaje);
+            out.writeUTF(autor + ": " +mensaje);
     }
 
     public void iniciarSesion(Socket socket) {

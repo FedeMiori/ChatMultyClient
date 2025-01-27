@@ -50,7 +50,6 @@ class Handler implements Runnable {
         out.writeUTF("Inserte su nombre de usuario para iniciar sesion");
         String nombreusuario = in.readUTF();
         this.usuario = controladorUsuarios.logearUsuario(nombreusuario,socket);
-        System.out.println("test "+nombreusuario);
         if(usuario != null){
             out.writeUTF("Usuario: '"+usuario.getNickName()+"' registrado con exito");
             System.out.println("Usuario: '"+usuario.getNickName()+"' registrado con exito");
@@ -93,7 +92,7 @@ class Handler implements Runnable {
 
                 case "msjcanal":
                     if(argumentos.length >= 2){
-                        Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[2] );
+                        Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[1] );
                         grupo.mandarMensajeAlGrupo(getAutor(), quitarArgumetos(argumentos,2));
                     }
                     else
@@ -103,27 +102,32 @@ class Handler implements Runnable {
 
                 case "crearcanal":
                     if(argumentos.length >= 2){
-                        String posibleNombre = argumentos[2];
+                        String posibleNombre = argumentos[1];
                         if(controladorGrupos.existeGrupo(posibleNombre))
                             out.writeUTF("El grupo '"+posibleNombre+"' ya existe");
-                        else
+                        else {
                             controladorGrupos.crearGrupo(posibleNombre);
+                            out.writeUTF("Grupo '"+posibleNombre+"' creado con exito");
+                        }
                     }
-                    out.writeUTF("ERROR: Faltan argumentos" +
+                    else
+                        out.writeUTF("ERROR: Faltan argumentos" +
                             "\n sintaxis: crearcanal [nombre_canal]");
                     break;
 
                 case "unir":
                     if(argumentos.length >= 2){
-                        Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[2] );
+                        Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[1] );
                         if(grupo != null){
-                            if(!grupo.estaEnElGrupo(usuario))
+                            if(!grupo.estaEnElGrupo(usuario)) {
                                 grupo.aniadirUsuarioAlGrupo(usuario);
+                                out.writeUTF("Te has unido al grupo '" + grupo.getNombre() + "'");
+                            }
                             else
                                 out.writeUTF("ERROR: El usuario ya estaba en ese grupo");
                         }
                         else
-                            out.writeUTF("ERROR: El grupo '"+argumentos[2]+"' no existe");
+                            out.writeUTF("ERROR: El grupo '"+argumentos[1]+"' no existe");
 
                     }
                     else
@@ -133,7 +137,7 @@ class Handler implements Runnable {
 
                 case "salir":
                     if(argumentos.length >= 2){
-                        Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[2] );
+                        Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[1] );
                         if(grupo.eliminarUsuario(usuario))
                             out.writeUTF("Te has salido del grupo");
                         else
