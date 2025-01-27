@@ -51,7 +51,7 @@ public class ControladorUsuarios {
 
     public Usuario getUsuarioEnLinea(String nombre){
         Usuario user = buscarPorNombre(nombre);
-        if(user.isOnline())
+        if(user != null && user.isOnline())
             return user;
         else
             return null;

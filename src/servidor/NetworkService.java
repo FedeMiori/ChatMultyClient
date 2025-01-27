@@ -11,8 +11,8 @@ import java.util.concurrent.Executors;
 public class NetworkService extends Thread {
     private final ServerSocket serverSocket;
     private final ExecutorService pool;
-    private ControladorUsuarios controladorUsuarios;
-    private ControladorGrupos controladorGrupos;
+    private final ControladorUsuarios controladorUsuarios;
+    private final ControladorGrupos controladorGrupos;
 
     public NetworkService(int port, int poolSize, ControladorUsuarios controladorUsuarios, ControladorGrupos controladorGrupos) throws IOException {
         serverSocket = new ServerSocket(port);

@@ -20,7 +20,7 @@ public class AppClienteMultiHilo {
                     DataInputStream in = new DataInputStream(sc.getInputStream());
                     while (true) {
                         String mensaje = in.readUTF();
-                        System.out.println("\nServidor: " + mensaje + "\n");
+                        System.out.println("Servidor: " + mensaje);
                     }
                 } catch (IOException e) {
                     System.out.println("Conexión cerrada por el servidor.");

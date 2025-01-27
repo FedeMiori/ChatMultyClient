@@ -1,7 +1,6 @@
 package servidor.controladores;
 
 import servidor.modelos.Grupo;
-import servidor.modelos.Usuario;
 
 import java.util.ArrayList;
 import java.util.List;

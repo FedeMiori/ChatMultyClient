@@ -83,7 +83,7 @@ class Handler implements Runnable {
                         Usuario user = controladorUsuarios.getUsuarioEnLinea(argumentos[1]);
                         mensaje = quitarArgumetos(argumentos,2);
                         user.mandarMensaje( getAutor(), mensaje );
-                        out.writeUTF("Mensaje: "+mensaje+" Enviado a: "+user.getNickName());
+                        //out.writeUTF("Mensaje: "+mensaje+" Enviado a: "+user.getNickName());
                     }
                     else
                         out.writeUTF("ERROR: Faltan argumentos" +
@@ -93,7 +93,8 @@ class Handler implements Runnable {
                 case "msjcanal":
                     if(argumentos.length >= 2){
                         Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[1] );
-                        grupo.mandarMensajeAlGrupo(getAutor(), quitarArgumetos(argumentos,2));
+                        mensaje = quitarArgumetos(argumentos,2);
+                        grupo.mandarMensajeAlGrupo(getAutor(), mensaje);
                     }
                     else
                         out.writeUTF("ERROR: Faltan argumentos" +

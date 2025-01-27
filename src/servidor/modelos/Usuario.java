@@ -12,13 +12,7 @@ public class Usuario {
 
     public Usuario(String nickName) {this.nickName = nickName.split(" ")[0].toLowerCase();}
 
-    public Socket getSocket() {return socket;}
-
     public boolean isOnline() {return online;}
-
-    public void setOnline(boolean online) {this.online = online;}
-
-    public void setSocket(Socket socket) {this.socket = socket;}
 
     public synchronized String getNickName() {return nickName;}
 
