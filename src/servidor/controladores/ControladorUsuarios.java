@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ControladorUsuarios {
+    private static ControladorUsuarios instancia;
+
     ArrayList<Usuario> listaUsuarios;
 
-    public ControladorUsuarios(){
+    private ControladorUsuarios(){
         listaUsuarios = new ArrayList<>();
     }
 
@@ -64,5 +66,11 @@ public class ControladorUsuarios {
                 usuariosEnLinea.add(listaUsuarios.get(i));
         }
         return usuariosEnLinea;
+    }
+
+    public static ControladorUsuarios getInstance(){
+        if(instancia == null)
+            instancia = new ControladorUsuarios();
+        return instancia;
     }
 }

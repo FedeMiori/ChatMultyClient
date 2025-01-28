@@ -19,10 +19,10 @@ class Handler implements Runnable {
     ControladorUsuarios controladorUsuarios;
     Usuario usuario;
 
-    Handler(Socket socket, ControladorUsuarios controladorUsuarios, ControladorGrupos controladorGrupos) {
+    Handler(Socket socket) {
         this.socket = socket;
-        this.controladorUsuarios = controladorUsuarios;
-        this.controladorGrupos = controladorGrupos;
+        this.controladorUsuarios = ControladorUsuarios.getInstance();
+        this.controladorGrupos = ControladorGrupos.getInstance();
     }
 
     public void run() {
@@ -39,9 +39,10 @@ class Handler implements Runnable {
             socket.close();
             System.out.println("Cliente: '" +getAutor()+ "' desconectado");
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.out.println("Cliente: '" +getAutor()+ "' desconectado de forma inesperada");
+            //throw new RuntimeException(e);
         }finally {
-            if(usuario != null)
+            if (usuario != null)
                 usuario.cerrarSesion();
         }
     }
@@ -71,14 +72,14 @@ class Handler implements Runnable {
             argumentos = inputCrudo.split(" ");
 
             switch ( argumentos[0] ){
-                case "msjbroadcast":
+                case "msgbroadcast":
                     mensaje = quitarArgumetos(argumentos,1);
                     List<Usuario> lista = controladorUsuarios.getUsuariosEnLinea();
                     for(Usuario usuarioDestino : lista)
                         usuarioDestino.mandarMensaje(getAutor(),mensaje);
                     break;
 
-                case "msj":
+                case "msg":
                     if(argumentos.length >= 2){
                         Usuario user = controladorUsuarios.getUsuarioEnLinea(argumentos[1]);
                         mensaje = quitarArgumetos(argumentos,2);
@@ -87,10 +88,10 @@ class Handler implements Runnable {
                     }
                     else
                         out.writeUTF("ERROR: Faltan argumentos" +
-                                "\n sintaxis: msj [usuario_destino] [mensaje]");
+                                "\n sintaxis: msg [usuario_destino] [mensaje]");
                     break;
 
-                case "msjcanal":
+                case "msgchannel":
                     if(argumentos.length >= 2){
                         Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[1] );
                         mensaje = quitarArgumetos(argumentos,2);
@@ -98,10 +99,10 @@ class Handler implements Runnable {
                     }
                     else
                         out.writeUTF("ERROR: Faltan argumentos" +
-                                "\n sintaxis: msjcanal [nombre_canal] [mensaje]");
+                                "\n sintaxis: msgchannel [nombre_canal] [mensaje]");
                     break;
 
-                case "crearcanal":
+                case "createchannel":
                     if(argumentos.length >= 2){
                         String posibleNombre = argumentos[1];
                         if(controladorGrupos.existeGrupo(posibleNombre))
@@ -113,10 +114,10 @@ class Handler implements Runnable {
                     }
                     else
                         out.writeUTF("ERROR: Faltan argumentos" +
-                            "\n sintaxis: crearcanal [nombre_canal]");
+                            "\n sintaxis: createchannel [nombre_canal]");
                     break;
 
-                case "unir":
+                case "joinchannel":
                     if(argumentos.length >= 2){
                         Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[1] );
                         if(grupo != null){
@@ -133,10 +134,10 @@ class Handler implements Runnable {
                     }
                     else
                         out.writeUTF("ERROR: Faltan argumentos" +
-                                "\n sintaxis: unir [canal]");
+                                "\n sintaxis: joinchannel [canal]");
                     break;
 
-                case "salir":
+                case "exitchannel":
                     if(argumentos.length >= 2){
                         Grupo grupo = controladorGrupos.buscarPorNombre( argumentos[1] );
                         if(grupo.eliminarUsuario(usuario))
@@ -144,22 +145,25 @@ class Handler implements Runnable {
                         else
                             out.writeUTF("ERROR: ya estabas fuera de ese grupo");
                     }
+                    else
+                        out.writeUTF("ERROR: Faltan argumentos" +
+                                "\n sintaxis: exitchannel [canal]");
                     break;
 
                 case "help":
                     out.writeUTF("Ayuda Comandos:\n" +
-                            "\nmsjbroadcast [mensaje]\n" +
+                            "\nmsgbroadcast [mensaje]\n" +
                             "   El mensaje será recibido por todos los clientes conectados al\n" +
                             "   servidor\n" +
-                            "\nmsj [usuario_destino] [mensaje]\n" +
+                            "\nmsg [usuario_destino] [mensaje]\n" +
                             "   El mensaje es privado y sólo lo recibirá el usuario destino\n" +
-                            "\nmsjcanal [nombre_canal] [mensaje]\n" +
+                            "\nmsgchannel [nombre_canal] [mensaje]\n" +
                             "   El mensaje llegará a todos los miembros de un un canal\n" +
-                            "\ncrearcanal [nombre_canal]\n" +
+                            "\ncreatechannel [nombre_canal]\n" +
                             "   Crea un nuevo grupo con el nombre indicado\n" +
-                            "\nunir [canal]\n" +
+                            "\njoinchannel [canal]\n" +
                             "   Une el cliente al canal indicado\n" +
-                            "\nsalir [canal]\n" +
+                            "\nexitchannel [canal]\n" +
                             "   Elimina al cliente del canal indicado\n" +
                             "\nexit\n" +
                             "   El cliente se desconecta del servidor");

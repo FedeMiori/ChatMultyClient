@@ -11,20 +11,16 @@ import java.util.concurrent.Executors;
 public class NetworkService extends Thread {
     private final ServerSocket serverSocket;
     private final ExecutorService pool;
-    private final ControladorUsuarios controladorUsuarios;
-    private final ControladorGrupos controladorGrupos;
 
-    public NetworkService(int port, int poolSize, ControladorUsuarios controladorUsuarios, ControladorGrupos controladorGrupos) throws IOException {
+    public NetworkService(int port, int poolSize) throws IOException {
         serverSocket = new ServerSocket(port);
         pool = Executors.newFixedThreadPool(poolSize);
-        this.controladorUsuarios = controladorUsuarios;
-        this.controladorGrupos = controladorGrupos;
     }
 
     public void run() { // run the service
         try {
             for (;;) {
-                pool.execute(new Handler(serverSocket.accept(), controladorUsuarios, controladorGrupos));
+                pool.execute(new Handler(serverSocket.accept()));
             }
         } catch (IOException ex) {
             pool.shutdown();

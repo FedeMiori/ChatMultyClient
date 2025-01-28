@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ControladorGrupos {
+    private static ControladorGrupos instancia;
+
     private List<Grupo> listaGrupos;
 
-    public ControladorGrupos(){
+    private ControladorGrupos(){
         listaGrupos = new ArrayList<>();
     }
 
@@ -40,5 +42,11 @@ public class ControladorGrupos {
 
     public boolean existeGrupo(String nombre){
         return buscarPorNombre(nombre) != null;
+    }
+
+    public static ControladorGrupos getInstance(){
+        if(instancia == null)
+            instancia = new ControladorGrupos();
+        return instancia;
     }
 }
