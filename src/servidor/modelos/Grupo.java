@@ -19,7 +19,8 @@ public class Grupo {
     public synchronized boolean mandarMensajeAlGrupo(String autor, String mensaje) throws IOException {
         if(estaEnElGrupo(autor)){
             for (Usuario usuario : listaUsuarios)
-                usuario.mandarMensaje("Grupo:"+nombre+" Autor:"+autor, mensaje);
+                if(usuario.isOnline())
+                    usuario.mandarMensaje("Grupo:"+nombre+" Autor:"+autor, mensaje);
             return true;
         }else
             return false;
@@ -28,21 +29,19 @@ public class Grupo {
     public synchronized boolean mandarMensajeAlGrupo(String mensaje) {
         try {
             for (Usuario usuario : listaUsuarios)
-                usuario.mandarMensaje("Grupo:"+nombre, mensaje);
+                if(usuario.isOnline())
+                    usuario.mandarMensaje("Grupo:"+nombre, mensaje);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return true;
     }
 
-    public synchronized boolean aniadirUsuarioAlGrupo(Usuario user){
+    public synchronized void aniadirUsuarioAlGrupo(Usuario user){
         if(!estaEnElGrupo(user)) {
             listaUsuarios.add(user);
             mandarMensajeAlGrupo("'"+user.getNickName()+"' se ha unido al grupo");
-            return true;
         }
-        else
-            return false;
     }
 
     public synchronized boolean eliminarUsuario(Usuario user){

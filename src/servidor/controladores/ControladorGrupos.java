@@ -15,9 +15,7 @@ public class ControladorGrupos {
     }
 
     private boolean nombreValido(String nombre){
-        return nombre != ""
-                && nombre != null
-                && nombre != "exit";
+        return !nombre.isEmpty() && !nombre.equals("exit");
     }
 
     public synchronized boolean crearGrupo(String nombre){
