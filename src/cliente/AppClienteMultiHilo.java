@@ -7,12 +7,26 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class AppClienteMultiHilo {
-    final static String HOST = "127.0.0.1";
-    final static int PORT = 5000;
+    private final static String HOST = "127.0.0.1";
+    private final static int DEFAULT_PORT = 5000;
+
+
+    private static int getPort(String[] args){
+        int port;
+        try{
+            port = Integer.parseInt(args[0]);
+            System.out.println("Puerto seleccionado " + port);
+        }catch (Exception e){
+            port = DEFAULT_PORT;
+            System.out.println("Puerto por defecto: " + port);
+        }
+
+        return port;
+    }
 
     public static void main(String[] args) {
         try {
-            Socket sc = new Socket(HOST, PORT);
+            Socket sc = new Socket(HOST, getPort(args));
             System.out.println("Cliente conectado!");
 
             Thread recibirHilo = new Thread(() -> {
